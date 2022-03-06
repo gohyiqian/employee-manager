@@ -2,65 +2,36 @@ import { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "../App.css";
 import { Button, Container } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
 import Box from "@mui/material/Box";
 import { useDispatch, useSelector } from "react-redux";
-import { getEmployees } from "../redux/slice/employeeSlice";
 import { actions } from "../redux/slice/employeeSlice";
-
-const URL = "https://6164f6e709a29d0017c88ed9.mockapi.io/fetest/employees";
-
-const flexStyle = {
-  display: "flex",
-  flexDirection: "column",
-  padding: "20px",
-};
-
-const btnStyle = {
-  textDecoration: "none",
-  paddingBottom: "10px",
-};
-
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  backgroundColor: "white",
-  border: "2px solid orange",
-  borderRadius: "10px",
-  padding: "15px",
-};
+import { flexStyle, btnStyle, modalStyle } from "./pagesStyle";
+import { types } from "../redux/types";
 
 const HomePage = () => {
-  const [userData, setUserData] = useState();
   const [gridApi, setGridApi] = useState(null);
-  const [show, setShow] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const { employeeInfo } = useSelector((state) => state.employees);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { employeeInfo, status } = useSelector((state) => state.employees);
-
-  // useEffect(() => {
-  //   const fetchEmployees = async () => {
-  //     let response = await fetch(URL);
-  //     const data = await response.json();
-  //     console.log(data);
-  //     setUserData(data);
-  //   };
-  //   fetchEmployees();
-  // }, []);
 
   useEffect(() => {
-    dispatch(getEmployees());
-    setUserData(employeeInfo);
-  }, [dispatch]);
+    if (employeeInfo.length === 0) {
+      loadData();
+    }
+  }, []);
+
+  const loadData = () => {
+    dispatch({ type: types.GET_EMPLOYEES });
+  };
 
   const DeleteBtn = () => {
     const onDelete = () => {
-      setShow(true);
+      setShowDeleteModal(true);
     };
     return (
       <Button color="error" variant="contained" onClick={onDelete}>
@@ -71,8 +42,7 @@ const HomePage = () => {
 
   const EditBtn = () => {
     const onEdit = () => {
-      console.log("Edit");
-      navigate("/employee/edit");
+      setShowEditModal(true);
     };
     return (
       <Button color="primary" variant="contained" onClick={onEdit}>
@@ -81,28 +51,27 @@ const HomePage = () => {
     );
   };
 
-  const handleClose = () => {
-    setShow(false);
+  const handleDelete = () => {
+    dispatch(actions.deleteEmployee(getSelectedRows()));
+    setShowDeleteModal(false);
   };
 
-  const handleDelete = (params) => {
-    setShow(false);
-    dispatch(actions.deleteEmployee(getSelectedRows()));
+  const handleEdit = () => {
+    dispatch(actions.getEmployeesById(getSelectedRows()));
+    setShowEditModal(false);
+    navigate(`/employee/edit/${getSelectedRows()}`);
   };
 
   const onGridReady = (params) => {
-    console.log(params.api);
     setGridApi(params.api);
   };
 
   const getRowNodeId = (params) => {
-    console.log(params);
     return params.id;
   };
 
   const getSelectedRows = () => {
     let selectedRows = gridApi.getSelectedRows();
-    console.log(selectedRows[0].id);
     // const selectedNodes = gridApi.getSelectedNodes();
     // console.log(selectedNodes);
     return selectedRows[0].id;
@@ -120,32 +89,42 @@ const HomePage = () => {
 
   return (
     <>
-      {!employeeInfo && status === "loading" ? (
-        <h1>Loading...</h1>
-      ) : (
-        <Container style={flexStyle}>
-          <h1>Table of Employees</h1>
-          <Link to="/employee/add" className="btn btn-hero" style={btnStyle}>
-            <Button color="primary" variant="contained">
-              Add
-            </Button>
-          </Link>
+      <Container style={flexStyle}>
+        <h1>Table of Employees</h1>
 
-          <div className="ag-theme-alpine" style={{ height: 600, width: 900 }}>
-            <AgGridReact
-              rowData={userData}
-              columnDefs={columnDefs}
-              onGridReady={onGridReady}
-              getRowNodeId={getRowNodeId}
-              enableRangeSelection={true}
-              rowSelection={"multiple"}
-              enableSorting={true}
-              enableFilter={true}
-            ></AgGridReact>
-          </div>
+        <Button
+          color="primary"
+          variant="contained"
+          style={btnStyle}
+          onClick={() => navigate("/employee/add")}
+        >
+          Add Employee
+        </Button>
+        <Button
+          color="primary"
+          variant="contained"
+          style={btnStyle}
+          onClick={loadData}
+        >
+          Refresh Data
+        </Button>
+
+        <div className="ag-theme-alpine" style={{ height: 600, width: 900 }}>
+          <AgGridReact
+            rowData={employeeInfo}
+            columnDefs={columnDefs}
+            onGridReady={onGridReady}
+            getRowNodeId={getRowNodeId}
+            enableRangeSelection={true}
+            rowSelection={"multiple"}
+            enableSorting={true}
+            enableFilter={true}
+          ></AgGridReact>
+        </div>
+        {showDeleteModal && (
           <Modal
-            open={show}
-            onClose={handleClose}
+            open={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
@@ -166,8 +145,29 @@ const HomePage = () => {
               </Button>
             </Box>
           </Modal>
-        </Container>
-      )}
+        )}
+        {showEditModal && (
+          <Modal
+            open={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box style={modalStyle}>
+              <Typography variant="h6" id="modal-title">
+                Confirm to Edit
+              </Typography>
+              <Typography variant="subtitle1" id="simple-modal-description">
+                Click button to Edit Page
+              </Typography>
+              <br />
+              <Button color="warning" variant="contained" onClick={handleEdit}>
+                Confirm
+              </Button>
+            </Box>
+          </Modal>
+        )}
+      </Container>
     </>
   );
 };

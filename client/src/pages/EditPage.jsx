@@ -10,28 +10,22 @@ import {
 } from "@mui/material";
 import * as yup from "yup";
 import { useFormik } from "formik";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { flexStyle, btnStyle } from "./pagesStyle";
+import { actions } from "../redux/slice/employeeSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { types } from "../redux/types";
+import { useEffect } from "react";
 
-const flexStyle = {
-  display: "flex",
-  flexDirection: "column",
-  padding: "20px",
-};
-
-const btnStyle = {
-  textDecoration: "none",
-  paddingBottom: "10px",
-};
-
-const phoneRegExp = /^\+65(6|8|9)\d{7}$/;
+const phoneRegExp = /^65(6|8|9)\d{7}$/;
 
 const validationSchema = yup.object({
-  firstname: yup
+  firstName: yup
     .string("Enter your firstname")
     .min(6, "First name should have minimum 6 characters length")
     .max(10, "First name should have maximum 10 characters length")
     .required("First name is required"),
-  lastname: yup
+  lastName: yup
     .string("Enter your lastname")
     .min(6, "Last name should have minimum 6 characters length")
     .max(10, "Last name should have maximum 10 characters length")
@@ -40,56 +34,85 @@ const validationSchema = yup.object({
     .string("Enter your email")
     .email("Enter a valid email")
     .required("Email is required"),
-  phone: yup
+  number: yup
     .string()
-    .matches(phoneRegExp, "Phone number should starts with 65")
+    .matches(
+      phoneRegExp,
+      "Phone number should start with 65, followed by 8 or 9"
+    )
     .required("Phone number is required"),
+  gender: yup.string(),
 });
 
-const AddPage = () => {
+const EditPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const employeeId = useParams().id;
+  const { employeeInfo } = useSelector((state) => state.employees);
+  let employee = employeeInfo[0];
+  console.log(employee);
+
+  useEffect(() => {
+    dispatch(actions.getEmployeesById(employeeId));
+  }, []);
+
+  const goBack = () => {
+    dispatch({ type: types.GET_EMPLOYEES });
+    navigate("/employee/list");
+  };
+
   const formik = useFormik({
     initialValues: {
-      email: "foobar@example.com",
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      email: employee.email,
+      number: employee.number,
+      gender: employee.gender,
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       alert(JSON.stringify(values, null, 2));
       navigate("/employee/list");
+      dispatch(actions.updateEmployee(values));
+      dispatch({ type: types.GET_EMPLOYEES });
     },
   });
 
   return (
     <Container style={flexStyle}>
-      <h1>Edit Employee</h1>
-      <Link to="/employee/list" className="btn btn-hero" style={btnStyle}>
-        <Button color="primary" variant="contained">
-          Back
-        </Button>
-      </Link>
+      <h1>Add Employee</h1>
+
+      <Button
+        color="primary"
+        variant="contained"
+        onClick={goBack}
+        style={btnStyle}
+      >
+        Back
+      </Button>
+
       <form onSubmit={formik.handleSubmit}>
         <Grid item sm={5} md={5}>
           <Paper elevation={3} style={flexStyle}>
             <TextField
               id="firstname"
-              name="firstname"
+              name="firstName"
               label="First Name"
-              value={formik.values.firstname}
+              value={formik.values.firstName}
               onChange={formik.handleChange}
               error={
-                formik.touched.firstname && Boolean(formik.errors.firstname)
+                formik.touched.firstName && Boolean(formik.errors.firstName)
               }
-              helperText={formik.touched.firstname && formik.errors.firstname}
+              helperText={formik.touched.firstName && formik.errors.firstName}
             />
             <TextField
               id="lastname"
-              name="lastname"
+              name="lastName"
               label="Last Name"
-              placeholder=""
-              value={formik.values.lastname}
+              value={formik.values.lastName}
               onChange={formik.handleChange}
-              error={formik.touched.lastname && Boolean(formik.errors.lastname)}
-              helperText={formik.touched.lastname && formik.errors.lastname}
+              error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+              helperText={formik.touched.lastName && formik.errors.lastName}
             />
             <TextField
               id="email"
@@ -103,13 +126,13 @@ const AddPage = () => {
             />
             <TextField
               id="phone"
-              name="phone"
+              name="number"
               label="Phone Number"
               placeholder="65 XXXX XXXX"
-              value={formik.values.phone}
+              value={formik.values.number}
               onChange={formik.handleChange}
-              error={formik.touched.phone && Boolean(formik.errors.phone)}
-              helperText={formik.touched.phone && formik.errors.phone}
+              error={formik.touched.number && Boolean(formik.errors.number)}
+              helperText={formik.touched.number && formik.errors.number}
             />
             <br />
 
@@ -117,19 +140,32 @@ const AddPage = () => {
             <RadioGroup
               style={{ padding: "10px" }}
               aria-labelledby="demo-radio-buttons-group-label"
-              defaultValue="female"
-              name="radio-buttons-group"
+              defaultValue={formik.values.gender}
+              name="gender"
             >
               <FormControlLabel
+                id="female"
+                name="gender"
                 value="female"
+                onChange={formik.handleChange}
                 control={<Radio />}
-                label="Female"
+                label="female"
               />
-              <FormControlLabel value="male" control={<Radio />} label="Male" />
               <FormControlLabel
-                value="other"
+                id="male"
+                name="gender"
+                value="male"
+                onChange={formik.handleChange}
                 control={<Radio />}
-                label="Other"
+                label="male"
+              />
+              <FormControlLabel
+                id="other"
+                name="gender"
+                value="other"
+                onChange={formik.handleChange}
+                control={<Radio />}
+                label="other"
               />
             </RadioGroup>
 
@@ -144,4 +180,4 @@ const AddPage = () => {
   );
 };
 
-export default AddPage;
+export default EditPage;
