@@ -1,7 +1,15 @@
 import express from "express";
 const router = express.Router();
-import { createCafe } from "../controllers/cafeController.js";
+import {
+  createCafe,
+  createCafeEmployee,
+  getAllEmployees,
+  getCafeLocation,
+} from "../controllers/cafeController.js";
 
-router.route("/").post(createCafe);
+router.route("/cafe").post(createCafe);
+router.route("/cafe/employee").post(createCafeEmployee);
+router.route("/cafes/employees").get(getAllEmployees);
+// router.route(`/cafes?location=${location}`).get(getCafeLocation);
 
 export default router;

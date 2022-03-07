@@ -5,18 +5,18 @@ import initDB from "./config/db.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-//models
-import Cafe from "./models/Cafe.js";
-import Employee from "./models/Employee.js";
-
 // routers
 import cafeRouter from "./routes/cafeRoute.js";
+import employeeRouter from "./routes/employeeRoute.js";
+import drinkRouter from "./routes/drinkRoute.js";
 
 // middlewares
 app.use(express.json());
 
 // use routers
-app.use("/api/cafe", cafeRouter);
+app.use("/drinks", drinkRouter);
+app.use("/api", cafeRouter);
+app.use("/api", employeeRouter);
 
 app.get("/", (req, res) => {
   // throw new Error("error");

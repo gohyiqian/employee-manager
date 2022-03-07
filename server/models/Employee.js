@@ -26,13 +26,11 @@ const employeeSchema = new Schema(
       required: [true, "Please provide number of days worked"],
     },
     cafe: {
-      type: String,
-      required: [true, "Please provide name of cafe employee is under"],
-      minlength: 6,
-      maxlength: 20,
+      type: mongoose.Schema.Types.ObjectId,
+      required: [true, "Please provide name of cafe employee is working at"],
       ref: "Cafe",
     },
-    _id: {
+    id: {
       type: String,
       default: customedIdentifier(),
       required: [true, "Please provide UIXXXXXXX"],
