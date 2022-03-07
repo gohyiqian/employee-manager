@@ -5,16 +5,25 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "server": "nodemon server --ignore client",
+    "client": "cd ../ && npm start --prefix client",
+    "start": "concurrently --kill-others-on-fail \"npm run server\" \" npm run client\"",
+    "dev": "nodemon -L ./server.js localhost:5000"
   },
   "author": "kenji",
   "license": "ISC",
   "dependencies": {
+    "concurrently": "^7.0.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
-    "mongoose": "^6.2.4"
+    "mongoose": "^6.2.4",
+    "mongoose-uuid4": "0.0.1",
+    "multer": "^1.4.4",
+    "randomstring": "^1.2.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
-  }
+  },
+  "type": "module"
 }

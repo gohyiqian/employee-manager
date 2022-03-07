@@ -1,5 +1,30 @@
 # Employee-Manager
 
+# Instructions
+
+## For local
+
+To start up both the front(PORT:3000) & backend(PORT:5000).
+
+```
+cd server
+npm start
+```
+
+To start either front React or backend Express only
+
+```
+npm run server
+npm run client
+```
+
+## For Docker
+
+```
+docker-compose build
+docker-compose up
+```
+
 ## FrontEnd
 
 - ReactJS
