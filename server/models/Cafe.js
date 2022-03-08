@@ -14,8 +14,8 @@ const cafeSchema = new Schema(
     description: {
       type: String,
       required: [true, "Please provide description"],
-      minlength: 8,
-      maxlength: 20,
+      minlength: 10,
+      maxlength: 30,
       unique: true,
     },
     employees: {
@@ -23,9 +23,13 @@ const cafeSchema = new Schema(
       default: 0,
     },
     // Buffer data type allows us to store our image as data in the form of arrays
+    // logo: {
+    //   data: Buffer,
+    //   contentType: String,
+    // },
     logo: {
-      data: Buffer,
-      contentType: String,
+      type: String,
+      default: "image.png",
     },
     location: {
       type: String,

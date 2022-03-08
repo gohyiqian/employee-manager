@@ -10,6 +10,6 @@ import {
 router.route("/cafe").post(createCafe);
 router.route("/cafe/employee").post(createCafeEmployee);
 router.route("/cafes/employees").get(getAllEmployees);
-// router.route(`/cafes?location=${location}`).get(getCafeLocation);
+router.route(`/cafes`).get(getCafeLocation);
 
 export default router;
