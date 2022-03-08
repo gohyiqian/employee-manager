@@ -4,7 +4,7 @@
 
 ## For local
 
-At server folder, create and .env file and Add your MongoDB URI string to it
+At server folder, create an .env file and add your MongoDB URI string to it
 
 ```
 // sample URI
